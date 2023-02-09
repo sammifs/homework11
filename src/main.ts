@@ -528,7 +528,8 @@ function user_print(prompt_string: string, object: any): void {
 }
 
 function user_read(prompt_string: string): string | null {
-    return prompt(prompt_string + "\n");
+    display(prompt_string);
+    return prompt("");
 }
 
 const input_prompt = "\nM-evaluate input:\n";
