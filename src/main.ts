@@ -1,5 +1,7 @@
 import * as PromptSync from "prompt-sync";
 
+// test string: function factorial(n) { return n < 2 ? n : n * factorial(n - 1); }
+
 const prompt: PromptSync.Prompt = PromptSync({sigint:true});
 
 import { is_boolean, set_head, is_pair, list_ref, apply_in_underlying_javascript, pair, stringify, is_null, error, math_abs, math_PI, math_E, display, map, accumulate, length, parse, append, head, list, tail } from 'sicp';
@@ -378,6 +380,7 @@ function incremental_transform(component: TaggedListComponent): Component {
 // functions from SICP JS 4.1.1
 
 function evaluate(component: Component, env: Environment): Value {
+    console.log(component); // remove
     return is_literal(component)
            ? literal_value(component)
            : is_name(component)
@@ -512,11 +515,11 @@ function make_literal(value: Value): Literal {
 }
 
 function is_name(component: Component): component is Name {
-    return is_tagged_list(component, "name");
+    return component.tag === "name";
 }
 
 function make_name(symbol: Symbol): Name {
-    return list("name", symbol);
+    return { tag:"name", symbol: symbol};
 }
 
 function symbol_of_name(component: Name): Symbol {
@@ -570,7 +573,7 @@ function make_lambda_expression(parameters: List<Name>, body: Component): Lambda
 }
 
 function is_function_declaration(component: Component): component is Function {
-    return is_tagged_list(component, "function_declaration");
+    return component.tag === "function_declaration";
 }
 function function_declaration_name(component: Function): Name {
     // return list_ref(component, 1);
@@ -665,8 +668,7 @@ function second_operand(component: Binary): Expression {
 }
 
 function make_application(function_expression: Name, argument_expressions: List<Expression>): Application {
-    return list("application",
-                function_expression, argument_expressions);
+    return { tag: "application", function_expression: function_expression, arguments: argument_expressions };
 }
 
 function operator_combination_to_application(component: OperatorCombination): Application {
@@ -680,13 +682,15 @@ function operator_combination_to_application(component: OperatorCombination): Ap
 }
 
 function is_application(component: Component): component is Application {
-   return is_tagged_list(component, "application");
+   return component.tag === "application";
 }
-function function_expression(component: Application): Name {
-   return head(tail(component));
+
+// Changed return type from "Name" to "Expression"
+function function_expression(component: Application): Expression {
+   return component.function_expression;
 }
 function arg_expressions(component: Application): List<Expression> {
-   return head(tail(tail(component)));
+   return component.arguments;
 }
 
 // functions from SICP JS 4.1.3

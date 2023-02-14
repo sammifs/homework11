@@ -302,6 +302,7 @@ function incremental_transform(component) {
 // SICP JS 3.1.4
 // functions from SICP JS 4.1.1
 function evaluate(component, env) {
+    console.log(component); // remove
     return is_literal(component)
         ? literal_value(component)
         : is_name(component)
@@ -409,10 +410,10 @@ function make_literal(value) {
     return (0, sicp_1.list)("literal", value);
 }
 function is_name(component) {
-    return is_tagged_list(component, "name");
+    return component.tag === "name";
 }
 function make_name(symbol) {
-    return (0, sicp_1.list)("name", symbol);
+    return { tag: "name", symbol: symbol };
 }
 function symbol_of_name(component) {
     return component.symbol;
@@ -458,7 +459,7 @@ function make_lambda_expression(parameters, body) {
     return (0, sicp_1.list)("lambda_expression", parameters, body);
 }
 function is_function_declaration(component) {
-    return is_tagged_list(component, "function_declaration");
+    return component.tag === "function_declaration";
 }
 function function_declaration_name(component) {
     // return list_ref(component, 1);
@@ -542,7 +543,7 @@ function second_operand(component) {
     return component.right;
 }
 function make_application(function_expression, argument_expressions) {
-    return (0, sicp_1.list)("application", function_expression, argument_expressions);
+    return { tag: "application", function_expression: function_expression, arguments: argument_expressions };
 }
 function operator_combination_to_application(component) {
     var operator = operator_symbol(component);
@@ -551,13 +552,14 @@ function operator_combination_to_application(component) {
         : make_application(make_name(operator), (0, sicp_1.list)(first_operand(component), second_operand(component)));
 }
 function is_application(component) {
-    return is_tagged_list(component, "application");
+    return component.tag === "application";
 }
+// Changed return type from "Name" to "Expression"
 function function_expression(component) {
-    return (0, sicp_1.head)((0, sicp_1.tail)(component));
+    return component.function_expression;
 }
 function arg_expressions(component) {
-    return (0, sicp_1.head)((0, sicp_1.tail)((0, sicp_1.tail)(component)));
+    return component.arguments;
 }
 // functions from SICP JS 4.1.3
 function is_truthy(x) {
