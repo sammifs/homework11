@@ -277,8 +277,8 @@ function incremental_transform(component: TaggedListComponent): Component {
 
     // Transformers
     function transform_name(name: TaggedListName): Name {
-        // return name as unknown as Name;
-        return { tag: "name", symbol: head(tail(name)) };
+        return name as unknown as Name;
+        // return { tag: "name", symbol: head(tail(name)) };
     }
     function transform_literal(literal: TaggedListLiteral): Literal {
         //return literal as unknown as Literal;
@@ -321,8 +321,8 @@ function incremental_transform(component: TaggedListComponent): Component {
         // return { tag: "function_declaration", name: transform_name(list_ref(fun, 1)), parameters: map(transform_name, list_ref(fun, 2)), body: transform_component(list_ref(fun, 3)) };
     }
     function transform_declaration(decl: TaggedListDeclaration): Declaration {
-        return list("constant_declaration", transform_name(list_ref(decl, 1)), transform_expression(list_ref(decl, 2)));
-        // return { tag: "constant_declaration", name: transform_name(list_ref(decl, 1)), initialiser: transform_expression(list_ref(decl, 2)) };
+        // return list("constant_declaration", transform_name(list_ref(decl, 1)), transform_expression(list_ref(decl, 2)));
+        return { tag: "constant_declaration", name: transform_name(list_ref(decl, 1)), initialiser: transform_expression(list_ref(decl, 2)) };
     }
     function transform_assignment(assg: TaggedListAssignment): Assignment {
         return list("assignment", transform_name(list_ref(assg, 1)), transform_expression(list_ref(assg, 2)));
@@ -520,7 +520,7 @@ function make_name(symbol: Symbol): Name {
 }
 
 function symbol_of_name(component: Name): Symbol {
-    return head(tail(component));
+    return component.symbol;
 }
 
 function is_assignment(component: Component): component is Assignment {
@@ -534,16 +534,21 @@ function assignment_value_expression(component: Assignment): Expression {
 }
 
 function is_declaration(component: Component): component is Declaration {
-    return is_tagged_list(component, "constant_declaration") ||
-           is_tagged_list(component, "variable_declaration") ||
-           is_tagged_list(component, "function_declaration");
+    return component.tag === "constant_declaration" 
+        || component.tag ===  "variable_declaration" 
+        || component.tag === "function_declaration";
+
 }
 
 function declaration_symbol(component: Declaration): Symbol {
-    return symbol_of_name(list_ref(component, 1));
+    return symbol_of_name(component.name);
 }
 function declaration_value_expression(component: Declaration): Expression {
-    return list_ref(component, 2);
+    if (component.tag === "constant_declaration" || component.tag === "variable_declaration") {
+        return component.initialiser;
+    } else {
+        return list_ref(component, 2);
+    }
 }
 
 function make_constant_declaration(name: Name, value_expression: Expression): Constant {

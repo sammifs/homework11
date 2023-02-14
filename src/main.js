@@ -209,8 +209,8 @@ function incremental_transform(component) {
     }
     // Transformers
     function transform_name(name) {
-        // return name as unknown as Name;
-        return { tag: "name", symbol: (0, sicp_1.head)((0, sicp_1.tail)(name)) };
+        return name;
+        // return { tag: "name", symbol: head(tail(name)) };
     }
     function transform_literal(literal) {
         //return literal as unknown as Literal;
@@ -253,8 +253,8 @@ function incremental_transform(component) {
         // return { tag: "function_declaration", name: transform_name(list_ref(fun, 1)), parameters: map(transform_name, list_ref(fun, 2)), body: transform_component(list_ref(fun, 3)) };
     }
     function transform_declaration(decl) {
-        return (0, sicp_1.list)("constant_declaration", transform_name((0, sicp_1.list_ref)(decl, 1)), transform_expression((0, sicp_1.list_ref)(decl, 2)));
-        // return { tag: "constant_declaration", name: transform_name(list_ref(decl, 1)), initialiser: transform_expression(list_ref(decl, 2)) };
+        // return list("constant_declaration", transform_name(list_ref(decl, 1)), transform_expression(list_ref(decl, 2)));
+        return { tag: "constant_declaration", name: transform_name((0, sicp_1.list_ref)(decl, 1)), initialiser: transform_expression((0, sicp_1.list_ref)(decl, 2)) };
     }
     function transform_assignment(assg) {
         return (0, sicp_1.list)("assignment", transform_name((0, sicp_1.list_ref)(assg, 1)), transform_expression((0, sicp_1.list_ref)(assg, 2)));
@@ -415,7 +415,7 @@ function make_name(symbol) {
     return (0, sicp_1.list)("name", symbol);
 }
 function symbol_of_name(component) {
-    return (0, sicp_1.head)((0, sicp_1.tail)(component));
+    return component.symbol;
 }
 function is_assignment(component) {
     return is_tagged_list(component, "assignment");
@@ -427,15 +427,20 @@ function assignment_value_expression(component) {
     return (0, sicp_1.head)((0, sicp_1.tail)((0, sicp_1.tail)(component)));
 }
 function is_declaration(component) {
-    return is_tagged_list(component, "constant_declaration") ||
-        is_tagged_list(component, "variable_declaration") ||
-        is_tagged_list(component, "function_declaration");
+    return component.tag === "constant_declaration"
+        || component.tag === "variable_declaration"
+        || component.tag === "function_declaration";
 }
 function declaration_symbol(component) {
-    return symbol_of_name((0, sicp_1.list_ref)(component, 1));
+    return symbol_of_name(component.name);
 }
 function declaration_value_expression(component) {
-    return (0, sicp_1.list_ref)(component, 2);
+    if (component.tag === "constant_declaration" || component.tag === "variable_declaration") {
+        return component.initialiser;
+    }
+    else {
+        return (0, sicp_1.list_ref)(component, 2);
+    }
 }
 function make_constant_declaration(name, value_expression) {
     return (0, sicp_1.list)("constant_declaration", name, value_expression);
