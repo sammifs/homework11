@@ -281,20 +281,20 @@ function incremental_transform(component: TaggedListComponent): Component {
         return { tag: "name", symbol: head(tail(name)) };
     }
     function transform_literal(literal: TaggedListLiteral): Literal {
-        return literal as unknown as Literal;
-        // return { tag: "literal", value: head(tail(literal)) };
+        //return literal as unknown as Literal;
+        return { tag: "literal", value: head(tail(literal)) };
     }
     function transform_application(app: TaggedListApplication): Application {
-        return list(head(app), transform_expression(head(tail(app))), map(tagged_list_to_record, head(tail(tail(app)))));
-        // return { tag: "application", function_expression: transform_expression(head(tail(app))), arguments: map(tagged_list_to_record, head(tail(tail(app)))) };
+        return list(head(app), transform_expression(head(tail(app))), map(incremental_transform, head(tail(tail(app)))));
+        // return { tag: "application", function_expression: transform_expression(head(tail(app))), arguments: map(incremental_transform, head(tail(tail(app)))) };
     }
     function transform_operator_combination(op: TaggedListOperatorCombination): OperatorCombination {
-        return append(list(head(op), head(tail(op)), map(transform_component, tail(tail(op)))));
-        // const operator: Operator = head(tail(op));
-        // const operands: List<Expression> = map(transform_expression, tail(tail(op)));
-        // return head(op) === "unary_operator_combination"
-            // ? { tag: "unary_operator_combination", operator: operator, operand: list_ref(operands, 0) }
-            // : { tag: "binary_operator_combination", operator: operator, left: list_ref(operands, 0), right: list_ref(operands, 1) };
+        //return append(list(head(op), head(tail(op))), map(transform_component, tail(tail(op))));
+        const operator: Operator = head(tail(op));
+        const operands: List<Expression> = map(transform_expression, tail(tail(op)));
+        return head(op) === "unary_operator_combination"
+            ? { tag: "unary_operator_combination", operator: operator, operand: list_ref(operands, 0) }
+            : { tag: "binary_operator_combination", operator: operator, left: list_ref(operands, 0), right: list_ref(operands, 1) };
     }
     function transform_conditional(cond: TaggedListConditional): Conditional {
         return list(head(cond), transform_expression(list_ref(cond, 1)), transform_component(list_ref(cond, 2)), transform_component(list_ref(cond, 3)));
@@ -325,8 +325,8 @@ function incremental_transform(component: TaggedListComponent): Component {
         // return { tag: "constant_declaration", name: transform_name(list_ref(decl, 1)), initialiser: transform_expression(list_ref(decl, 2)) };
     }
     function transform_assignment(assg: TaggedListAssignment): Assignment {
-        return list("assignment", transform_name(list_ref(assg, 1)), transform_component(list_ref(assg, 2)));
-        // return { tag: "assignment", name: transform_name(list_ref(assg, 1)), right_hand_side: transform_component(list_ref(assg, 2)) };
+        return list("assignment", transform_name(list_ref(assg, 1)), transform_expression(list_ref(assg, 2)));
+        // return { tag: "assignment", name: transform_name(list_ref(assg, 1)), right_hand_side: transform_expression(list_ref(assg, 2)) };
     }
 
     function transform_component(component: TaggedListComponent): Component {
@@ -501,10 +501,10 @@ function is_tagged_list(component: any, the_tag: string): boolean {
 }
 
 function is_literal(component: Component): component is Literal {
-    return is_tagged_list(component, "literal");
+    return component.tag === "literal" ? true : false;
 }
 function literal_value(component: Literal): Value {
-    return head(tail(component));
+    return component.value;
 }
 
 function make_literal(value: Value): Literal {
@@ -642,19 +642,21 @@ function is_operator_combination(component: Component): component is OperatorCom
            is_binary_operator_combination(component);
 }
 function is_unary_operator_combination(component: Component): component is Unary {
-    return is_tagged_list(component, "unary_operator_combination");
+    return component.tag === "unary_operator_combination" ? true : false;
 }
 function is_binary_operator_combination(component: Component): component is Binary {
-    return is_tagged_list(component, "binary_operator_combination");
+    return component.tag === "binary_operator_combination" ? true : false;
 }
 function operator_symbol(component: OperatorCombination): Operator {
-    return head(tail(component));
+    return component.operator;
 }
 function first_operand(component: OperatorCombination): Expression {
-    return head(tail(tail(component)));
+    return component.tag === "unary_operator_combination"
+           ? component.operand
+           : component.left;
 }
 function second_operand(component: Binary): Expression {
-    return head(tail(tail(tail(component))));
+    return component.right;
 }
 
 function make_application(function_expression: Name, argument_expressions: List<Expression>): Application {
@@ -874,11 +876,13 @@ function driver_loop(env: Environment, history: string): void {
         display("", history + "\n--- session end ---\n");
     } else {
         const program = parse(input);
-        const locals = scan_out_declarations(program);
+        console.log(program);
+        const record_program = incremental_transform(program);
+        const locals = scan_out_declarations(record_program);
         const unassigneds = list_of_unassigned(locals);
         const program_env = extend_environment(
                                 locals, unassigneds, env);
-        const output = evaluate(program, program_env);
+        const output = evaluate(record_program, program_env);
         const new_history = history +
               input_prompt +
               input +
