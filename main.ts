@@ -154,7 +154,7 @@ export function tagged_list_to_record(component: TaggedListComponent): Component
         return { tag: "sequence", statements: map(transform_component, list_ref(seq, 1)) };
     }
     function transform_block(block: TaggedListBlock): Block {
-        return { tag: "block", body: map(transform_statement, list_ref(block, 0)) };
+        return { tag: "block", body: transform_statement(list_ref(block, 1)) };
     }
     function transform_return_statement(ret: TaggedListReturnStatement): ReturnStatement {
         return { tag: "return_statement", return_expression: transform_expression(list_ref(ret, 1)) };
@@ -382,11 +382,14 @@ function is_declaration(component: Component): component is Declaration {
 function declaration_symbol(component: Declaration): Symbol {
     return symbol_of_name(component.name);
 }
+
+// component cannot be of Function type, already handled in evaluate
 function declaration_value_expression(component: Declaration): Expression {
-    if (component.tag === "constant_declaration" || component.tag === "variable_declaration") {
+    if (component.tag === "constant_declaration" || component.tag === "variable_declaration" ) {
         return component.initialiser;
-    } else {
-        return list_ref(component, 2);
+    }
+    else {
+        return make_name("This will not be reached.");
     }
 }
 
@@ -469,7 +472,7 @@ function is_last_statement(stmts: List<Statement>): boolean {
 }
 
 function is_block(component: Component): component is Block {
-    return is_tagged_list(component, "block");
+    return component.tag === "block" ? true : false;
 }
 function block_body(component: Block): Component {
     return component.body;
@@ -736,4 +739,4 @@ function driver_loop(env: Environment, history: string): void {
 
 "metacircular evaluator loaded";
 
-// driver_loop(the_global_environment, "--- session start ---");
+driver_loop(the_global_environment, "--- session start ---");

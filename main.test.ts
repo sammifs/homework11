@@ -1,5 +1,7 @@
 import { parse } from "sicp"
-import { Value, evaluate, extend_environment, list_of_unassigned, scan_out_declarations, tagged_list_to_record, the_global_environment } from "./main"
+import { Value, evaluate, extend_environment, 
+        list_of_unassigned, scan_out_declarations, 
+        tagged_list_to_record, the_global_environment } from "./main"
 
 function evaluation_tester(input: string): any {
     const env = the_global_environment;
@@ -13,7 +15,9 @@ function evaluation_tester(input: string): any {
 }
 
 test("factorial function", () => {
-    const factorial_tester = (x: number) => evaluation_tester(`function factorial(n) { return n < 2 ? n : n * factorial(n - 1); } factorial(${x});`);
+    const factorial_tester = (x: number) => evaluation_tester(`
+        function factorial(n) { return n < 2 ? n : n * factorial(n - 1); } factorial(${x});
+    `);
     expect(factorial_tester(10)).toBe(3628800);
     expect(factorial_tester(5)).toBe(120);
     expect(factorial_tester(14)).toBe(87178291200);
@@ -48,4 +52,9 @@ test("conditional", () => {
     expect(evaluation_tester("10 > 5;")).toBe(true);
     expect(evaluation_tester("10 < 50;")).toBe(true);
     expect(evaluation_tester("65 > 193;")).toBe(false);
+})
+
+test("block", () => {
+    const block_test = evaluation_tester("function foo(bar) { const temp = bar; return temp; } foo(5);");
+    expect(block_test).toBe(5);
 })
