@@ -238,8 +238,8 @@ function incremental_transform(component) {
         return { tag: "lambda_expression", parameters: (0, sicp_1.map)(transform_name, (0, sicp_1.list_ref)(lam, 1)), body: transform_component((0, sicp_1.list_ref)(lam, 2)) };
     }
     function transform_sequence(seq) {
-        return (0, sicp_1.list)((0, sicp_1.head)(seq), (0, sicp_1.map)(transform_component, (0, sicp_1.list_ref)(seq, 1)));
-        // return { tag: "sequence", statements: map(transform_component, list_ref(seq, 1)) };
+        // return list(head(seq), map(transform_component, list_ref(seq, 1)));
+        return { tag: "sequence", statements: (0, sicp_1.map)(transform_component, (0, sicp_1.list_ref)(seq, 1)) };
     }
     function transform_block(block) {
         return (0, sicp_1.list)((0, sicp_1.head)(block), (0, sicp_1.map)(transform_component, (0, sicp_1.list_ref)(block, 1)));
@@ -501,10 +501,10 @@ function conditional_alternative(component) {
     return component.alternative;
 }
 function is_sequence(stmt) {
-    return is_tagged_list(stmt, "sequence");
+    return stmt.tag === "sequence" ? true : false;
 }
 function sequence_statements(stmt) {
-    return (0, sicp_1.head)((0, sicp_1.tail)(stmt));
+    return stmt.statements;
 }
 function first_statement(stmts) {
     return (0, sicp_1.head)(stmts);

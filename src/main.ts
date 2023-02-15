@@ -307,8 +307,8 @@ function incremental_transform(component: TaggedListComponent): Component {
         return { tag: "lambda_expression", parameters: map(transform_name, list_ref(lam, 1)), body: transform_component(list_ref(lam, 2)) };
     }
     function transform_sequence(seq: TaggedListSequence): Sequence {
-        return list(head(seq), map(transform_component, list_ref(seq, 1)));
-        // return { tag: "sequence", statements: map(transform_component, list_ref(seq, 1)) };
+        // return list(head(seq), map(transform_component, list_ref(seq, 1)));
+        return { tag: "sequence", statements: map(transform_component, list_ref(seq, 1)) };
     }
     function transform_block(block: TaggedListBlock): Block {
         return list(head(block), map(transform_component, list_ref(block, 1)));
@@ -621,10 +621,10 @@ function conditional_alternative(component: Conditional): Component {
 }
 
 function is_sequence(stmt: Component): stmt is Sequence {
-   return is_tagged_list(stmt, "sequence");
+    return stmt.tag === "sequence" ? true : false;
 }
-function sequence_statements(stmt: Sequence): List<Statement> { 
-   return head(tail(stmt));
+function sequence_statements(stmt: Sequence): List<Statement> {
+    return stmt.statements;
 }
 function first_statement(stmts: List<Statement>): Statement {
    return head(stmts);
