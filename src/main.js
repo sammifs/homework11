@@ -250,8 +250,8 @@ function incremental_transform(component) {
         return { tag: "return_statement", return_expression: transform_expression((0, sicp_1.list_ref)(ret, 1)) };
     }
     function transform_function_declaration(fun) {
-        return (0, sicp_1.list)("function_declaration", transform_name((0, sicp_1.list_ref)(fun, 1)), (0, sicp_1.map)(transform_name, (0, sicp_1.list_ref)(fun, 2)), transform_component((0, sicp_1.list_ref)(fun, 3)));
-        // return { tag: "function_declaration", name: transform_name(list_ref(fun, 1)), parameters: map(transform_name, list_ref(fun, 2)), body: transform_component(list_ref(fun, 3)) };
+        // return list("function_declaration", transform_name(list_ref(fun, 1)), map(transform_name, list_ref(fun, 2)), transform_component(list_ref(fun, 3)));
+        return { tag: "function_declaration", name: transform_name((0, sicp_1.list_ref)(fun, 1)), parameters: (0, sicp_1.map)(transform_name, (0, sicp_1.list_ref)(fun, 2)), body: transform_component((0, sicp_1.list_ref)(fun, 3)) };
     }
     function transform_declaration(decl) {
         // return list("constant_declaration", transform_name(list_ref(decl, 1)), transform_expression(list_ref(decl, 2)));
@@ -445,7 +445,8 @@ function declaration_value_expression(component) {
     }
 }
 function make_constant_declaration(name, value_expression) {
-    return (0, sicp_1.list)("constant_declaration", name, value_expression);
+    return { tag: "constant_declaration", name: name, initialiser: value_expression };
+    // return list("constant_declaration", name, value_expression);
 }
 function is_lambda_expression(component) {
     return component.tag === "lambda_expression" ? true : false;
@@ -457,21 +458,25 @@ function lambda_body(component) {
     return component.body;
 }
 function make_lambda_expression(parameters, body) {
-    return (0, sicp_1.list)("lambda_expression", parameters, body);
+    return { tag: "lambda_expression", parameters: parameters, body: body };
+    // return list("lambda_expression", parameters, body);
 }
 function is_function_declaration(component) {
     return component.tag === "function_declaration";
 }
 function function_declaration_name(component) {
+    return component.name;
     // return list_ref(component, 1);
-    return (0, sicp_1.head)((0, sicp_1.tail)(component));
+    // return head(tail(component));
 }
 function function_declaration_parameters(component) {
+    return component.parameters;
     // return list_ref(component, 2);
-    return (0, sicp_1.head)((0, sicp_1.tail)((0, sicp_1.tail)(component)));
+    // return head(tail(tail(component)));
 }
 function function_declaration_body(component) {
-    return (0, sicp_1.list_ref)(component, 3);
+    return component.body;
+    // return list_ref(component, 3);
 }
 function function_decl_to_constant_decl(component) {
     return make_constant_declaration(function_declaration_name(component), make_lambda_expression(function_declaration_parameters(component), function_declaration_body(component)));
