@@ -218,8 +218,8 @@ function incremental_transform(component: TaggedListComponent): Component {
     function is_statement(c: TaggedList): c is TaggedListExpression {
         const tag = head(c);
         return tag === "block" || tag === "sequence" || 
-            tag === "function_declaration" || tag === "constant_declaration" || tag === "assignment" || 
-            tag === "return_statement";
+            tag === "function_declaration" || tag === "constant_declaration" || tag === "variable_declaration"
+            || tag === "assignment" ||  tag === "return_statement";
     }
     function is_expression(c: TaggedList): c is TaggedListExpression {
         const tag = head(c);
@@ -327,8 +327,8 @@ function incremental_transform(component: TaggedListComponent): Component {
         return { tag: "constant_declaration", name: transform_name(list_ref(decl, 1)), initialiser: transform_expression(list_ref(decl, 2)) };
     }
     function transform_assignment(assg: TaggedListAssignment): Assignment {
-        return list("assignment", transform_name(list_ref(assg, 1)), transform_expression(list_ref(assg, 2)));
-        // return { tag: "assignment", name: transform_name(list_ref(assg, 1)), right_hand_side: transform_expression(list_ref(assg, 2)) };
+        // return list("assignment", transform_name(list_ref(assg, 1)), transform_expression(list_ref(assg, 2)));
+        return { tag: "assignment", name: transform_name(list_ref(assg, 1)), right_hand_side: transform_expression(list_ref(assg, 2)) };
     }
 
     function transform_component(component: TaggedListComponent): Component {
@@ -527,13 +527,13 @@ function symbol_of_name(component: Name): Symbol {
 }
 
 function is_assignment(component: Component): component is Assignment {
-    return is_tagged_list(component, "assignment");
+    return component.tag === "assignment" ? true : false;
 }
 function assignment_symbol(component: Assignment): Symbol {
-    return head(tail(head(tail(component))));
+    return symbol_of_name(component.name);
 }
 function assignment_value_expression(component: Assignment): Expression {
-    return head(tail(tail(component)));
+    return component.right_hand_side;
 }
 
 function is_declaration(component: Component): component is Declaration {

@@ -150,8 +150,8 @@ function incremental_transform(component) {
     function is_statement(c) {
         var tag = (0, sicp_1.head)(c);
         return tag === "block" || tag === "sequence" ||
-            tag === "function_declaration" || tag === "constant_declaration" || tag === "assignment" ||
-            tag === "return_statement";
+            tag === "function_declaration" || tag === "constant_declaration" || tag === "variable_declaration"
+            || tag === "assignment" || tag === "return_statement";
     }
     function is_expression(c) {
         var tag = (0, sicp_1.head)(c);
@@ -258,8 +258,8 @@ function incremental_transform(component) {
         return { tag: "constant_declaration", name: transform_name((0, sicp_1.list_ref)(decl, 1)), initialiser: transform_expression((0, sicp_1.list_ref)(decl, 2)) };
     }
     function transform_assignment(assg) {
-        return (0, sicp_1.list)("assignment", transform_name((0, sicp_1.list_ref)(assg, 1)), transform_expression((0, sicp_1.list_ref)(assg, 2)));
-        // return { tag: "assignment", name: transform_name(list_ref(assg, 1)), right_hand_side: transform_expression(list_ref(assg, 2)) };
+        // return list("assignment", transform_name(list_ref(assg, 1)), transform_expression(list_ref(assg, 2)));
+        return { tag: "assignment", name: transform_name((0, sicp_1.list_ref)(assg, 1)), right_hand_side: transform_expression((0, sicp_1.list_ref)(assg, 2)) };
     }
     function transform_component(component) {
         return is_expression(component)
@@ -420,13 +420,13 @@ function symbol_of_name(component) {
     return component.symbol;
 }
 function is_assignment(component) {
-    return is_tagged_list(component, "assignment");
+    return component.tag === "assignment" ? true : false;
 }
 function assignment_symbol(component) {
-    return (0, sicp_1.head)((0, sicp_1.tail)((0, sicp_1.head)((0, sicp_1.tail)(component))));
+    return symbol_of_name(component.name);
 }
 function assignment_value_expression(component) {
-    return (0, sicp_1.head)((0, sicp_1.tail)((0, sicp_1.tail)(component)));
+    return component.right_hand_side;
 }
 function is_declaration(component) {
     return component.tag === "constant_declaration"
