@@ -230,8 +230,8 @@ function incremental_transform(component) {
             : { tag: "binary_operator_combination", operator: operator, left: (0, sicp_1.list_ref)(operands, 0), right: (0, sicp_1.list_ref)(operands, 1) };
     }
     function transform_conditional(cond) {
-        return (0, sicp_1.list)((0, sicp_1.head)(cond), transform_expression((0, sicp_1.list_ref)(cond, 1)), transform_component((0, sicp_1.list_ref)(cond, 2)), transform_component((0, sicp_1.list_ref)(cond, 3)));
-        // return { tag: head(cond), predicate: transform_expression(list_ref(cond, 1)), consequent: transform_component(list_ref(cond, 2)), alternative: transform_component(list_ref(cond, 3)) };
+        // return list(head(cond), transform_expression(list_ref(cond, 1)), transform_component(list_ref(cond, 2)), transform_component(list_ref(cond, 3)));
+        return { tag: (0, sicp_1.head)(cond), predicate: transform_expression((0, sicp_1.list_ref)(cond, 1)), consequent: transform_component((0, sicp_1.list_ref)(cond, 2)), alternative: transform_component((0, sicp_1.list_ref)(cond, 3)) };
     }
     function transform_lambda(lam) {
         // return list(head(lam), map(transform_component, list_ref(lam, 1)), transform_component(list_ref(lam, 2)));
@@ -483,17 +483,17 @@ function return_expression(component) {
     return component.return_expression;
 }
 function is_conditional(component) {
-    return is_tagged_list(component, "conditional_expression") ||
-        is_tagged_list(component, "conditional_statement");
+    return component.tag === "conditional_expression"
+        || component.tag === "conditional_statement";
 }
 function conditional_predicate(component) {
-    return (0, sicp_1.list_ref)(component, 1);
+    return component.predicate;
 }
 function conditional_consequent(component) {
-    return (0, sicp_1.list_ref)(component, 2);
+    return component.consequent;
 }
 function conditional_alternative(component) {
-    return (0, sicp_1.list_ref)(component, 3);
+    return component.alternative;
 }
 function is_sequence(stmt) {
     return is_tagged_list(stmt, "sequence");
