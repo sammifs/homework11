@@ -279,16 +279,16 @@ function incremental_transform(component: TaggedListComponent): Component {
 
     // Transformers
     function transform_name(name: TaggedListName): Name {
-        return name as unknown as Name;
-        // return { tag: "name", symbol: head(tail(name)) };
+        // return name as unknown as Name;
+        return { tag: "name", symbol: head(tail(name)) };
     }
     function transform_literal(literal: TaggedListLiteral): Literal {
         //return literal as unknown as Literal;
         return { tag: "literal", value: head(tail(literal)) };
     }
     function transform_application(app: TaggedListApplication): Application {
-        return list(head(app), transform_expression(head(tail(app))), map(incremental_transform, head(tail(tail(app)))));
-        // return { tag: "application", function_expression: transform_expression(head(tail(app))), arguments: map(incremental_transform, head(tail(tail(app)))) };
+        // return list(head(app), transform_expression(head(tail(app))), map(incremental_transform, head(tail(tail(app)))));
+        return { tag: "application", function_expression: transform_expression(head(tail(app))), arguments: map(incremental_transform, head(tail(tail(app)))) };
     }
     function transform_operator_combination(op: TaggedListOperatorCombination): OperatorCombination {
         //return append(list(head(op), head(tail(op))), map(transform_component, tail(tail(op))));
@@ -303,8 +303,8 @@ function incremental_transform(component: TaggedListComponent): Component {
         // return { tag: head(cond), predicate: transform_expression(list_ref(cond, 1)), consequent: transform_component(list_ref(cond, 2)), alternative: transform_component(list_ref(cond, 3)) };
     }
     function transform_lambda(lam: TaggedListLambda): Lambda {
-        return list(head(lam), map(transform_component, list_ref(lam, 1)), transform_component(list_ref(lam, 2)));
-        // return { tag: "lambda_expression", parameters: map(transform_name, list_ref(lam, 1)), body: transform_component(list_ref(lam, 2)) };
+        // return list(head(lam), map(transform_component, list_ref(lam, 1)), transform_component(list_ref(lam, 2)));
+        return { tag: "lambda_expression", parameters: map(transform_name, list_ref(lam, 1)), body: transform_component(list_ref(lam, 2)) };
     }
     function transform_sequence(seq: TaggedListSequence): Sequence {
         return list(head(seq), map(transform_component, list_ref(seq, 1)));
@@ -315,8 +315,8 @@ function incremental_transform(component: TaggedListComponent): Component {
         // return { tag: "block", body: map(transform_statement, list_ref(block, 1)) };
     }
     function transform_return_statement(ret: TaggedListReturnStatement): ReturnStatement {
-        return list(head(ret), transform_expression(list_ref(ret, 1)));
-        // return { tag: "return_statement", return_expression: transform_expression(list_ref(ret, 1)) };
+        // return list(head(ret), transform_expression(list_ref(ret, 1)));
+        return { tag: "return_statement", return_expression: transform_expression(list_ref(ret, 1)) };
     }
     function transform_function_declaration(fun: TaggedListFunction): Function {
         return list("function_declaration", transform_name(list_ref(fun, 1)), map(transform_name, list_ref(fun, 2)), transform_component(list_ref(fun, 3)));
@@ -559,13 +559,13 @@ function make_constant_declaration(name: Name, value_expression: Expression): Co
 }
 
 function is_lambda_expression(component: Component): component is Lambda {
-    return is_tagged_list(component, "lambda_expression");
+    return component.tag === "lambda_expression" ? true : false;
 }
 function lambda_parameter_symbols(component: Lambda): List<Symbol> {
-    return map(symbol_of_name, head(tail(component)));
+    return map(symbol_of_name, component.parameters);
 }
 function lambda_body(component: Lambda): Component {
-    return head(tail(tail(component)));
+    return component.body;
 }
 
 function make_lambda_expression(parameters: List<Name>, body: Component): Lambda {

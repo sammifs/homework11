@@ -1,6 +1,7 @@
 "use strict";
 exports.__esModule = true;
 var PromptSync = require("prompt-sync");
+// test string: function factorial(n) { return n < 2 ? n : n * factorial(n - 1); }
 var prompt = PromptSync({ sigint: true });
 var sicp_1 = require("sicp");
 function tagged_list_to_record(component) {
@@ -209,16 +210,16 @@ function incremental_transform(component) {
     }
     // Transformers
     function transform_name(name) {
-        return name;
-        // return { tag: "name", symbol: head(tail(name)) };
+        // return name as unknown as Name;
+        return { tag: "name", symbol: (0, sicp_1.head)((0, sicp_1.tail)(name)) };
     }
     function transform_literal(literal) {
         //return literal as unknown as Literal;
         return { tag: "literal", value: (0, sicp_1.head)((0, sicp_1.tail)(literal)) };
     }
     function transform_application(app) {
-        return (0, sicp_1.list)((0, sicp_1.head)(app), transform_expression((0, sicp_1.head)((0, sicp_1.tail)(app))), (0, sicp_1.map)(incremental_transform, (0, sicp_1.head)((0, sicp_1.tail)((0, sicp_1.tail)(app)))));
-        // return { tag: "application", function_expression: transform_expression(head(tail(app))), arguments: map(incremental_transform, head(tail(tail(app)))) };
+        // return list(head(app), transform_expression(head(tail(app))), map(incremental_transform, head(tail(tail(app)))));
+        return { tag: "application", function_expression: transform_expression((0, sicp_1.head)((0, sicp_1.tail)(app))), arguments: (0, sicp_1.map)(incremental_transform, (0, sicp_1.head)((0, sicp_1.tail)((0, sicp_1.tail)(app)))) };
     }
     function transform_operator_combination(op) {
         //return append(list(head(op), head(tail(op))), map(transform_component, tail(tail(op))));
@@ -233,8 +234,8 @@ function incremental_transform(component) {
         // return { tag: head(cond), predicate: transform_expression(list_ref(cond, 1)), consequent: transform_component(list_ref(cond, 2)), alternative: transform_component(list_ref(cond, 3)) };
     }
     function transform_lambda(lam) {
-        return (0, sicp_1.list)((0, sicp_1.head)(lam), (0, sicp_1.map)(transform_component, (0, sicp_1.list_ref)(lam, 1)), transform_component((0, sicp_1.list_ref)(lam, 2)));
-        // return { tag: "lambda_expression", parameters: map(transform_name, list_ref(lam, 1)), body: transform_component(list_ref(lam, 2)) };
+        // return list(head(lam), map(transform_component, list_ref(lam, 1)), transform_component(list_ref(lam, 2)));
+        return { tag: "lambda_expression", parameters: (0, sicp_1.map)(transform_name, (0, sicp_1.list_ref)(lam, 1)), body: transform_component((0, sicp_1.list_ref)(lam, 2)) };
     }
     function transform_sequence(seq) {
         return (0, sicp_1.list)((0, sicp_1.head)(seq), (0, sicp_1.map)(transform_component, (0, sicp_1.list_ref)(seq, 1)));
@@ -245,8 +246,8 @@ function incremental_transform(component) {
         // return { tag: "block", body: map(transform_statement, list_ref(block, 1)) };
     }
     function transform_return_statement(ret) {
-        return (0, sicp_1.list)((0, sicp_1.head)(ret), transform_expression((0, sicp_1.list_ref)(ret, 1)));
-        // return { tag: "return_statement", return_expression: transform_expression(list_ref(ret, 1)) };
+        // return list(head(ret), transform_expression(list_ref(ret, 1)));
+        return { tag: "return_statement", return_expression: transform_expression((0, sicp_1.list_ref)(ret, 1)) };
     }
     function transform_function_declaration(fun) {
         return (0, sicp_1.list)("function_declaration", transform_name((0, sicp_1.list_ref)(fun, 1)), (0, sicp_1.map)(transform_name, (0, sicp_1.list_ref)(fun, 2)), transform_component((0, sicp_1.list_ref)(fun, 3)));
@@ -447,13 +448,13 @@ function make_constant_declaration(name, value_expression) {
     return (0, sicp_1.list)("constant_declaration", name, value_expression);
 }
 function is_lambda_expression(component) {
-    return is_tagged_list(component, "lambda_expression");
+    return component.tag === "lambda_expression" ? true : false;
 }
 function lambda_parameter_symbols(component) {
-    return (0, sicp_1.map)(symbol_of_name, (0, sicp_1.head)((0, sicp_1.tail)(component)));
+    return (0, sicp_1.map)(symbol_of_name, component.parameters);
 }
 function lambda_body(component) {
-    return (0, sicp_1.head)((0, sicp_1.tail)((0, sicp_1.tail)(component)));
+    return component.body;
 }
 function make_lambda_expression(parameters, body) {
     return (0, sicp_1.list)("lambda_expression", parameters, body);
