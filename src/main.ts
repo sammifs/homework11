@@ -595,10 +595,10 @@ function function_decl_to_constant_decl(component: Function): Constant {
 }
 
 function is_return_statement(component: Component): component is ReturnStatement {
-   return is_tagged_list(component, "return_statement");
+   return component.tag === "return_statement" ? true : false;
 }
-function return_expression(component: ReturnStatement) {
-   return head(tail(component));
+function return_expression(component: ReturnStatement): Expression {
+   return component.return_expression;
 }
 
 function is_conditional(component: Component): component is Conditional {

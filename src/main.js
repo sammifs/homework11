@@ -477,10 +477,10 @@ function function_decl_to_constant_decl(component) {
     return make_constant_declaration(function_declaration_name(component), make_lambda_expression(function_declaration_parameters(component), function_declaration_body(component)));
 }
 function is_return_statement(component) {
-    return is_tagged_list(component, "return_statement");
+    return component.tag === "return_statement" ? true : false;
 }
 function return_expression(component) {
-    return (0, sicp_1.head)((0, sicp_1.tail)(component));
+    return component.return_expression;
 }
 function is_conditional(component) {
     return is_tagged_list(component, "conditional_expression") ||
